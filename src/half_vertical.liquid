@@ -9,14 +9,18 @@
 {%- endfor -%}
 {%- assign last_date = today -%}
 {%- assign shown = 0 -%}
-{%- assign max_rows = 15 -%}
+
+{%- comment -%} Bigger type = fewer rows fit than the old 15-row budget. Starting guess of 7,
+     tuned against the live half_vertical preview rather than calculated. {%- endcomment -%}
+{%- assign max_rows = 7 -%}
 {%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
 
-<div class="layout layout--col">
-  <div class="label bg--black text--white">TODAY</div>
+<div class="layout layout--col gap--small">
+  <div class="label label--large label--filled text--center px--3 py--2">TODAY</div>
   {%- if today_count == 0 -%}
-    <div class="label label--small">No activities scheduled</div>
+    <div class="description description--base text--center">No activities scheduled</div>
   {%- endif -%}
+
   {%- for event in events -%}
     {%- assign edate = event.date_time | date: '%Y-%m-%d' -%}
     {%- if edate >= today and edate <= range_end -%}
@@ -26,21 +30,27 @@
         {%- assign needed = rows | plus: 1 -%}
       {%- endif -%}
       {%- if needed > max_rows -%}{%- break -%}{%- endif -%}
+
       {%- if edate != last_date -%}
         {%- assign last_date = edate -%}
         {%- assign rows = rows | plus: 1 -%}
         {%- if edate == tomorrow -%}
-          <div class="label bg--gray-65">TOMORROW</div>
+          <div class="label label--large bg--gray-50 text--center px--3 py--2">TOMORROW</div>
         {%- else -%}
-          <div class="label bg--gray-65">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
+          <div class="label label--large bg--gray-50 text--center px--3 py--2">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
         {%- endif -%}
       {%- endif -%}
-      <div class="flex gap--small justify--space-between">
-        <span class="label">{{ event.summary }}</span>
-        {%- unless event.all_day -%}
-          <span class="label label--underline">{{ event.start }}</span>
-        {%- endunless -%}
+
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="label label--large">{{ event.summary }}</span>
+          {%- unless event.all_day -%}
+            <span class="label label--small label--gray">{{ event.start }}</span>
+          {%- endunless -%}
+        </div>
       </div>
+
       {%- assign shown = shown | plus: 1 -%}
       {%- assign rows = rows | plus: 1 -%}
     {%- endif -%}
