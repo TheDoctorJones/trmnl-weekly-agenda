@@ -2,54 +2,80 @@
 {%- assign today = 'now' | date: '%Y-%m-%d' -%}
 {%- assign tomorrow = 'now' | date: '%s' | plus: 86400 | date: '%Y-%m-%d' -%}
 {%- assign range_end = 'now' | date: '%s' | plus: 2592000 | date: '%Y-%m-%d' -%}
-{%- assign today_count = 0 -%}
-{%- for event in events -%}
-  {%- assign d = event.date_time | date: '%Y-%m-%d' -%}
-  {%- if d == today -%}{%- assign today_count = today_count | plus: 1 -%}{%- endif -%}
-{%- endfor -%}
-{%- assign last_date = today -%}
-{%- assign shown = 0 -%}
 
-{%- comment -%} Bigger event text = fewer rows fit than the old 15-row budget.
+{%- comment -%} Unique in-range dates, ascending. TODAY is seeded in so its heading
+     always renders even when nothing is scheduled. {%- endcomment -%}
+{%- capture date_blob -%}{{ today }},{%- for e in events -%}{%- assign ed = e.date_time | date: '%Y-%m-%d' -%}{%- if ed >= today and ed <= range_end -%}{{ ed }},{%- endif -%}{%- endfor -%}{%- endcapture -%}
+{%- assign dates = date_blob | split: ',' | uniq | sort -%}
+
+{%- comment -%} Vertical budget: a heading and an event row each count as 1.
      Tuned against the live half_vertical preview. {%- endcomment -%}
 {%- assign max_rows = 12 -%}
-{%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
+{%- assign rows = 0 -%}
+{%- assign stop = false -%}
 
-<div class="layout layout--col layout--top layout--stretch-x gap--small">
-  <div class="label label--base text--bold w--full bg--black text--white px--3">TODAY</div>
-  {%- if today_count == 0 -%}
-    <div class="label label--base px--3">No activities scheduled</div>
-  {%- endif -%}
+<div class="layout layout--col layout--top layout--stretch-x gap--small p--0">
+  {%- for date in dates -%}
+    {%- if stop -%}{%- break -%}{%- endif -%}
 
-  {%- for event in events -%}
-    {%- assign edate = event.date_time | date: '%Y-%m-%d' -%}
-    {%- if edate >= today and edate <= range_end -%}
-      {%- if edate != last_date -%}
-        {%- assign needed = rows | plus: 2 -%}
-      {%- else -%}
-        {%- assign needed = rows | plus: 1 -%}
-      {%- endif -%}
-      {%- if needed > max_rows -%}{%- break -%}{%- endif -%}
+    {%- comment -%} All-day events for this date, alphabetical. Summaries are all we
+         need since these render without a time. {%- endcomment -%}
+    {%- capture ad_blob -%}{%- for e in events -%}{%- assign ed = e.date_time | date: '%Y-%m-%d' -%}{%- if ed == date and e.all_day -%}{{ e.summary }}~{%- endif -%}{%- endfor -%}{%- endcapture -%}
+    {%- assign ad_names = ad_blob | split: '~' | sort_natural -%}
+    {%- assign ad_count = ad_names | size -%}
 
-      {%- if edate != last_date -%}
-        {%- assign last_date = edate -%}
-        {%- assign rows = rows | plus: 1 -%}
-        {%- if edate == tomorrow -%}
-          <div class="label label--base text--bold w--full bg--gray-65 px--3">TOMORROW</div>
-        {%- else -%}
-          <div class="label label--base text--bold w--full bg--gray-65 px--3">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
-        {%- endif -%}
-      {%- endif -%}
+    {%- assign timed_count = 0 -%}
+    {%- for e in events -%}
+      {%- assign ed = e.date_time | date: '%Y-%m-%d' -%}
+      {%- if ed == date -%}{%- unless e.all_day -%}{%- assign timed_count = timed_count | plus: 1 -%}{%- endunless -%}{%- endif -%}
+    {%- endfor -%}
+    {%- assign day_total = ad_count | plus: timed_count -%}
 
-      <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
-        <span class="label label--large">{{ event.summary }}</span>
-        {%- unless event.all_day -%}
-          <span class="label label--base label--outline no-shrink">{{ event.start }}</span>
-        {%- endunless -%}
-      </div>
+    {%- comment -%} A day needs room for its heading AND at least one row, or we stop
+         entirely — prevents an orphaned heading clipped at the bottom edge. {%- endcomment -%}
+    {%- assign needed = rows | plus: 2 -%}
+    {%- if needed > max_rows -%}{%- assign stop = true -%}{%- break -%}{%- endif -%}
 
-      {%- assign shown = shown | plus: 1 -%}
+    {%- if date == today -%}
+      <div class="label label--base text--bold w--full bg--black text--white px--3">TODAY</div>
+    {%- elsif date == tomorrow -%}
+      <div class="label label--base text--bold w--full bg--gray-65 px--3">TOMORROW</div>
+    {%- else -%}
+      <div class="label label--base text--bold w--full bg--gray-65 px--3">{{ date | date: '%A, %b %-d' | upcase }}</div>
+    {%- endif -%}
+    {%- assign rows = rows | plus: 1 -%}
+
+    {%- if day_total == 0 -%}
+      <div class="label label--base px--3">No activities scheduled</div>
       {%- assign rows = rows | plus: 1 -%}
     {%- endif -%}
+
+    {%- comment -%} All-day first, no time shown. {%- endcomment -%}
+    {%- for name in ad_names -%}
+      {%- assign next_rows = rows | plus: 1 -%}
+      {%- if next_rows > max_rows -%}{%- assign stop = true -%}{%- break -%}{%- endif -%}
+      <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
+        <span class="label label--large">{{ name }}</span>
+      </div>
+      {%- assign rows = next_rows -%}
+    {%- endfor -%}
+
+    {%- comment -%} Then timed events, in calendar order, with the time pill. {%- endcomment -%}
+    {%- unless stop -%}
+      {%- for e in events -%}
+        {%- assign ed = e.date_time | date: '%Y-%m-%d' -%}
+        {%- if ed == date -%}
+          {%- unless e.all_day -%}
+            {%- assign next_rows = rows | plus: 1 -%}
+            {%- if next_rows > max_rows -%}{%- assign stop = true -%}{%- break -%}{%- endif -%}
+            <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
+              <span class="label label--large">{{ e.summary }}</span>
+              <span class="label label--base label--outline no-shrink">{{ e.start }}</span>
+            </div>
+            {%- assign rows = next_rows -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endunless -%}
   {%- endfor -%}
 </div>
