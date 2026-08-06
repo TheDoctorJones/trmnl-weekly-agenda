@@ -10,15 +10,15 @@
 {%- assign last_date = today -%}
 {%- assign shown = 0 -%}
 
-{%- comment -%} Bigger type = fewer rows fit than the old 15-row budget. Tuned against the
-     live half_vertical preview rather than calculated. {%- endcomment -%}
+{%- comment -%} Bigger event text = fewer rows fit than the old 15-row budget.
+     Tuned against the live half_vertical preview. {%- endcomment -%}
 {%- assign max_rows = 8 -%}
 {%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
 
-<div class="layout layout--col gap--small">
-  <div class="label label--large label--filled text--center px--3 py--2">TODAY</div>
+<div class="layout layout--col layout--stretch-x gap--small">
+  <div class="label label--small text--bold w--full bg--black text--white px--3">TODAY</div>
   {%- if today_count == 0 -%}
-    <div class="description description--base text--center">No activities scheduled</div>
+    <div class="label label--small px--3">No activities scheduled</div>
   {%- endif -%}
 
   {%- for event in events -%}
@@ -35,16 +35,16 @@
         {%- assign last_date = edate -%}
         {%- assign rows = rows | plus: 1 -%}
         {%- if edate == tomorrow -%}
-          <div class="label label--large bg--gray-50 text--center px--3 py--2">TOMORROW</div>
+          <div class="label label--small text--bold w--full bg--gray-65 px--3">TOMORROW</div>
         {%- else -%}
-          <div class="label label--large bg--gray-50 text--center px--3 py--2">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
+          <div class="label label--small text--bold w--full bg--gray-65 px--3">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
         {%- endif -%}
       {%- endif -%}
 
-      <div class="flex flex--col gap--none">
+      <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
         <span class="label label--large">{{ event.summary }}</span>
         {%- unless event.all_day -%}
-          <span class="label label--small label--gray">{{ event.start }}</span>
+          <span class="label label--large no-shrink">{{ event.start }}</span>
         {%- endunless -%}
       </div>
 
