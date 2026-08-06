@@ -12,6 +12,7 @@
      inline font-size. TRMNL's bitmap fonts only exist at 12/16/21px, so any class
      landing at or below 16px renders pixelated — this is the way around that. {%- endcomment -%}
 {%- assign head_size = 'font-size:16px' -%}
+{%- assign event_size = 'font-size:18px' -%}
 
 {%- comment -%} Vertical budget: a heading and an event row each count as 1.
      Tuned against the live half_vertical preview. {%- endcomment -%}
@@ -51,7 +52,7 @@
     {%- assign rows = rows | plus: 1 -%}
 
     {%- if day_total == 0 -%}
-      <div class="label label--large px--3" style="{{ head_size }}">No activities scheduled</div>
+      <div class="label label--large px--3" style="{{ event_size }}">No activities scheduled</div>
       {%- assign rows = rows | plus: 1 -%}
     {%- endif -%}
 
@@ -60,7 +61,7 @@
       {%- assign next_rows = rows | plus: 1 -%}
       {%- if next_rows > max_rows -%}{%- assign stop = true -%}{%- break -%}{%- endif -%}
       <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
-        <span class="label label--large">{{ name }}</span>
+        <span class="label label--large" style="{{ event_size }}">{{ name }}</span>
       </div>
       {%- assign rows = next_rows -%}
     {%- endfor -%}
@@ -74,7 +75,7 @@
             {%- assign next_rows = rows | plus: 1 -%}
             {%- if next_rows > max_rows -%}{%- assign stop = true -%}{%- break -%}{%- endif -%}
             <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
-              <span class="label label--large">{{ e.summary }}</span>
+              <span class="label label--large" style="{{ event_size }}">{{ e.summary }}</span>
               <span class="label label--large label--outline no-shrink" style="font-size:15px">{{ e.start }}</span>
             </div>
             {%- assign rows = next_rows -%}
