@@ -16,9 +16,9 @@
 {%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
 
 <div class="layout layout--col layout--top layout--stretch-x gap--small">
-  <div class="label label--small text--bold w--full bg--black text--white px--3">TODAY</div>
+  <div class="label label--base text--bold w--full bg--black text--white px--3">TODAY</div>
   {%- if today_count == 0 -%}
-    <div class="label label--small px--3">No activities scheduled</div>
+    <div class="label label--base px--3">No activities scheduled</div>
   {%- endif -%}
 
   {%- for event in events -%}
@@ -35,16 +35,16 @@
         {%- assign last_date = edate -%}
         {%- assign rows = rows | plus: 1 -%}
         {%- if edate == tomorrow -%}
-          <div class="label label--small text--bold w--full bg--gray-65 px--3">TOMORROW</div>
+          <div class="label label--base text--bold w--full bg--gray-65 px--3">TOMORROW</div>
         {%- else -%}
-          <div class="label label--small text--bold w--full bg--gray-65 px--3">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
+          <div class="label label--base text--bold w--full bg--gray-65 px--3">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
         {%- endif -%}
       {%- endif -%}
 
       <div class="flex flex--row flex--between flex--center-y gap--small w--full px--3">
         <span class="label label--large">{{ event.summary }}</span>
         {%- unless event.all_day -%}
-          <span class="label label--large no-shrink">{{ event.start }}</span>
+          <span class="label label--base label--outline no-shrink">{{ event.start }}</span>
         {%- endunless -%}
       </div>
 
@@ -52,10 +52,4 @@
       {%- assign rows = rows | plus: 1 -%}
     {%- endif -%}
   {%- endfor -%}
-</div>
-
-<div class="title_bar">
-  <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
-  <span class="title">{{ trmnl.plugin_settings.instance_name }}</span>
-  <span class="instance">Week Agenda</span>
 </div>
