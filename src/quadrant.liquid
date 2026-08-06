@@ -1,0 +1,59 @@
+{%- comment -%} Replace with your own merge variable name — see note below {%- endcomment -%}
+{%- assign events = google_calendar_408243.events -%}
+
+{%- assign today = 'now' | date: '%Y-%m-%d' -%}
+{%- assign tomorrow = 'now' | date: '%s' | plus: 86400 | date: '%Y-%m-%d' -%}
+{%- assign week_end = 'now' | date: '%s' | plus: 604800 | date: '%Y-%m-%d' -%}
+
+{%- assign last_date = '' -%}
+{%- assign shown = 0 -%}
+
+{%- comment -%} Vertical budget: how many rows fit in the quadrant. A heading and an
+     event row each count as 1. Tune max_rows if content clips or leaves a gap.
+     Tuned to 8 against the real device. {%- endcomment -%}
+{%- assign max_rows = 8 -%}
+{%- assign rows = 0 -%}
+
+<div class="view view--quadrant" style="height: 100%; padding: 0;">
+  <div style="height: 100%; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; box-sizing: border-box; padding: 0; overflow: hidden;">
+    {%- for event in events -%}
+      {%- assign edate = event.date_time | date: '%Y-%m-%d' -%}
+      {%- if edate >= today and edate <= week_end -%}
+
+        {%- comment -%} Budget check. A new day needs room for its heading AND at least one
+             event (2 rows) or we stop entirely — that's what prevents an orphaned heading
+             clipped at the bottom edge. A same-day event only needs 1 row. {%- endcomment -%}
+        {%- if edate != last_date -%}
+          {%- assign needed = rows | plus: 2 -%}
+        {%- else -%}
+          {%- assign needed = rows | plus: 1 -%}
+        {%- endif -%}
+        {%- if needed > max_rows -%}{%- break -%}{%- endif -%}
+
+        {%- if edate != last_date -%}
+          {%- comment -%} No top margin on the very first heading, so it sits flush with the top edge {%- endcomment -%}
+          {%- if rows == 0 -%}{%- assign head_margin = '0 0 5px' -%}{%- else -%}{%- assign head_margin = '5px 0' -%}{%- endif -%}
+          {%- assign last_date = edate -%}
+          {%- assign rows = rows | plus: 1 -%}
+          {%- if edate == today -%}
+            <div class="label bg--black text--white" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: {{ head_margin }}; font-weight: bold; white-space: nowrap;">TODAY</div>
+          {%- elsif edate == tomorrow -%}
+            <div class="label bg--gray-30 text--white" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: {{ head_margin }}; font-weight: bold; white-space: nowrap;">TOMORROW</div>
+          {%- else -%}
+            <div class="label bg--gray-70" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: {{ head_margin }}; font-weight: bold; white-space: nowrap;">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
+          {%- endif -%}
+        {%- endif -%}
+
+        <div style="flex: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 8px; padding: 0 14px; margin: 0 0 5px 0; align-items: center; justify-content: space-between;">
+          <span class="label" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ event.summary }}</span>
+          {%- unless event.all_day -%}
+            <span class="label" style="flex: 0 0 auto; white-space: nowrap; font-size: 0.9em; border: 1px solid #000; border-radius: 9px; padding: 0 6px;">{{ event.start }}</span>
+          {%- endunless -%}
+        </div>
+
+        {%- assign shown = shown | plus: 1 -%}
+        {%- assign rows = rows | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>

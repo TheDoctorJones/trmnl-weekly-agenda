@@ -1,0 +1,73 @@
+{%- comment -%} Replace with your own merge variable name — see note below {%- endcomment -%}
+{%- assign events = google_calendar_408243.events -%}
+
+{%- assign today = 'now' | date: '%Y-%m-%d' -%}
+{%- assign tomorrow = 'now' | date: '%s' | plus: 86400 | date: '%Y-%m-%d' -%}
+
+{%- comment -%} How far ahead to show. 2592000 = 30 days. Use 1209600 for 14, 604800 for 7.
+     The calendar plugin's Layout setting must fetch at least this far: Month = 30 days,
+     Schedule = 14, anything else = 7. {%- endcomment -%}
+{%- assign range_end = 'now' | date: '%s' | plus: 2592000 | date: '%Y-%m-%d' -%}
+
+{%- comment -%} Count today's events up front, so we know whether to show the placeholder {%- endcomment -%}
+{%- assign today_count = 0 -%}
+{%- for event in events -%}
+  {%- assign d = event.date_time | date: '%Y-%m-%d' -%}
+  {%- if d == today -%}{%- assign today_count = today_count | plus: 1 -%}{%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} TODAY always renders, so seed last_date to suppress a duplicate heading in the loop {%- endcomment -%}
+{%- assign last_date = today -%}
+{%- assign shown = 0 -%}
+
+{%- comment -%} Vertical budget: a heading and an event row each count as 1.
+     Starts at 1 for the TODAY heading, 2 if the placeholder is also drawn. {%- endcomment -%}
+{%- assign max_rows = 15 -%}
+{%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
+
+<div class="view view--half_vertical" style="height: 100%; padding: 0;">
+  <div style="height: 100%; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; box-sizing: border-box; padding: 0; overflow: hidden;">
+
+    {%- comment -%} TODAY heading always renders, whether or not there are events {%- endcomment -%}
+    <div class="label bg--black text--white" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: 0 0 5px; font-weight: bold; white-space: nowrap;">TODAY</div>
+    {%- if today_count == 0 -%}
+      <div class="label" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 0 14px; margin: 0 0 5px; font-style: italic; font-size: 0.8em;">No activities scheduled</div>
+    {%- endif -%}
+
+    {%- for event in events -%}
+      {%- assign edate = event.date_time | date: '%Y-%m-%d' -%}
+      {%- if edate >= today and edate <= range_end -%}
+
+        {%- comment -%} Budget check. A new day needs room for its heading AND at least one
+             event (2 rows) or we stop entirely — that's what prevents an orphaned heading
+             clipped at the bottom edge. A same-day event only needs 1 row. {%- endcomment -%}
+        {%- if edate != last_date -%}
+          {%- assign needed = rows | plus: 2 -%}
+        {%- else -%}
+          {%- assign needed = rows | plus: 1 -%}
+        {%- endif -%}
+        {%- if needed > max_rows -%}{%- break -%}{%- endif -%}
+
+        {%- if edate != last_date -%}
+          {%- assign last_date = edate -%}
+          {%- assign rows = rows | plus: 1 -%}
+          {%- if edate == tomorrow -%}
+            <div class="label bg--gray-65" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: 5px 0; font-weight: bold; white-space: nowrap;">TOMORROW</div>
+          {%- else -%}
+            <div class="label bg--gray-65" style="flex: 0 0 auto; width: 100%; box-sizing: border-box; padding: 2px 14px; margin: 5px 0; font-weight: bold; white-space: nowrap;">{{ event.date_time | date: '%A, %b %-d' | upcase }}</div>
+          {%- endif -%}
+        {%- endif -%}
+
+        <div style="flex: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 8px; padding: 0 14px; margin: 0 0 5px 0; align-items: center; justify-content: space-between;">
+          <span class="label" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ event.summary }}</span>
+          {%- unless event.all_day -%}
+            <span class="label" style="flex: 0 0 auto; white-space: nowrap; font-size: 0.9em; border: 1px solid #000; border-radius: 9px; padding: 0 6px;">{{ event.start }}</span>
+          {%- endunless -%}
+        </div>
+
+        {%- assign shown = shown | plus: 1 -%}
+        {%- assign rows = rows | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
