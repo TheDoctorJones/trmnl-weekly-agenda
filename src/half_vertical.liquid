@@ -12,10 +12,10 @@
 
 {%- comment -%} Bigger event text = fewer rows fit than the old 15-row budget.
      Tuned against the live half_vertical preview. {%- endcomment -%}
-{%- assign max_rows = 8 -%}
+{%- assign max_rows = 12 -%}
 {%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
 
-<div class="layout layout--col layout--stretch-x gap--small">
+<div class="layout layout--col layout--top layout--stretch-x gap--small">
   <div class="label label--small text--bold w--full bg--black text--white px--3">TODAY</div>
   {%- if today_count == 0 -%}
     <div class="label label--small px--3">No activities scheduled</div>
