@@ -10,9 +10,9 @@
 {%- assign last_date = today -%}
 {%- assign shown = 0 -%}
 
-{%- comment -%} Bigger type = fewer rows fit than the old 15-row budget. Starting guess of 7,
-     tuned against the live half_vertical preview rather than calculated. {%- endcomment -%}
-{%- assign max_rows = 7 -%}
+{%- comment -%} Bigger type = fewer rows fit than the old 15-row budget. Tuned against the
+     live half_vertical preview rather than calculated. {%- endcomment -%}
+{%- assign max_rows = 8 -%}
 {%- if today_count == 0 -%}{%- assign rows = 2 -%}{%- else -%}{%- assign rows = 1 -%}{%- endif -%}
 
 <div class="layout layout--col gap--small">
@@ -41,14 +41,11 @@
         {%- endif -%}
       {%- endif -%}
 
-      <div class="item">
-        <div class="meta"></div>
-        <div class="content">
-          <span class="label label--large">{{ event.summary }}</span>
-          {%- unless event.all_day -%}
-            <span class="label label--small label--gray">{{ event.start }}</span>
-          {%- endunless -%}
-        </div>
+      <div class="flex flex--col gap--none">
+        <span class="label label--large">{{ event.summary }}</span>
+        {%- unless event.all_day -%}
+          <span class="label label--small label--gray">{{ event.start }}</span>
+        {%- endunless -%}
       </div>
 
       {%- assign shown = shown | plus: 1 -%}
