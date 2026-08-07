@@ -52,9 +52,9 @@
     {%- if date == today -%}
       <div class="label label--large text--bold w--full bg--black text--white px--3" style="{{ head_padding }}; {{ head_size }};">TODAY</div>
     {%- elsif date == tomorrow -%}
-      <div class="label label--large text--bold w--full bg--gray-65 px--3" style="{{ head_padding }}; {{ head_size }};">TOMORROW</div>
+      <div class="label label--large text--bold w--full bg--gray-70 px--3" style="{{ head_padding }}; {{ head_size }};">TOMORROW</div>
     {%- else -%}
-      <div class="label label--large text--bold w--full bg--gray-65 px--3" style="{{ head_padding }}; {{ head_size }};">{{ date | date: '%A, %b %-d' | upcase }}</div>
+      <div class="label label--large text--bold w--full bg--gray-70 px--3" style="{{ head_padding }}; {{ head_size }};">{{ date | date: '%A, %b %-d' | upcase }}</div>
     {%- endif -%}
     {%- assign rows = rows | plus: 1 -%}
 
